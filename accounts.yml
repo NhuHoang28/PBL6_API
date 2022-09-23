@@ -1,0 +1,236 @@
+openapi: 3.0.1
+info:
+  title: Expenditure management
+  version: 1.0.0
+paths:
+  /accounts:
+    post:
+      tags:
+      - accounts
+      summary: Tạo tài khoản mới (Chỉ cần tạo account, còn infor thì của trường)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - account
+                - password
+                - confirm_password
+                - id_role
+              properties:
+                account:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                confirm_password: 
+                  type: string
+                  format: password
+                id_role:
+                  type: string
+        required: true
+      responses:
+        200:
+          description: Request đã được tiếp nhập và xử lý thành công.
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        422:
+          description: Unprocessable Entity - tên đăng nhập, email đã được sử dụng, hoặc chưa được nhập, confirm_password không khớp password.
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /accounts/login:
+    post:
+      tags:
+      - accounts
+      summary: Đăng nhập vào hệ thống.
+      requestBody:
+          content:
+            application/json:
+              schema:
+                required:
+                  - account
+                  - password
+                properties:
+                  account:
+                    type: string
+                  password:
+                    type: string
+                    format: password
+          required: true
+      responses:
+        200:
+          description: Request đã được tiếp nhập và xử lý thành công.
+          content: 
+            application/json:
+              schema:
+                properties:
+                  token:
+                    type: string
+                    example: "abcxyzabcxyz123456789" 
+        401:
+          description: Unauthorized 
+          content: 
+            application/json:
+              schema:
+                  properties:
+                    message:
+                      type: string
+                      example: "Tên đăng nhập và mật khẩu không hợp lệ"
+        422:
+          description: Unprocessable Entity - tên đăng nhập, password chưa được nhập, chưa đúng.
+          content: 
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ValidationError'
+  /accounts/logout:
+    get:
+      tags:
+      - accounts
+      summary: Người dùng đăng xuất khỏi hệ thống.
+      operationId: logoutUser
+      responses:
+        200:
+          description: Request đã được tiếp nhập và xử lý thành công.
+        401:
+          description: Unauthorized- người dùng chưa đăng nhập để thực hiện chức năng này.
+      security:
+        - bearerAuth: [] 
+  /accounts/me:
+    get:
+      tags:
+      - accounts
+      summary: Lấy tài khoản của người đã đăng nhập
+      responses:
+        200:
+          description: Request đã được tiếp nhập và xử lý thành công.
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        401:
+          description: Unauthorized- người dùng chưa đăng nhập để thực hiện chức năng này.
+      security:
+        - bearerAuth: [] 
+    put:
+      tags:
+      - accounts
+      summary: Cập nhập thông tin tài khoản theo người dùng đang đăng nhập.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                  - email
+              properties:
+                account:
+                  type: string
+                  description: Tên đăng nhập.
+        required: true
+      responses:
+        201:
+          description: Request đã được xử lý thành công.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        401:
+          description: Unauthorized- người dùng chưa đăng nhập để thực hiện chức năng này.
+        422:
+          description: Unprocessable Entityy - tên đăng nhập đã tồn tại, password chưa đúng, chưa được nhập.
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      security:
+        - bearerAuth: [] 
+  /accounts/change-password:
+    put:
+      tags:
+      - accounts
+      summary: Cập nhập mật khẩu theo id người dùng đang đăng nhập.
+      requestBody:
+        description: Đối tượng user cập nhập.
+        content:
+          application/json:
+            schema:
+              required:
+                - current_password
+                - password
+                - confirm_password
+              properties:
+                current_password: 
+                  type: string
+                  format: password
+                  description: Mật khẩu cập nhập.
+                password: 
+                  type: string
+                  format: password
+                  description: Mật khẩu cập nhập.
+                confirm_password: 
+                  type: string
+                  format: password
+                  description: Mật khẩu cập nhập.
+        required: true
+      responses:
+        201:
+          description: Request đã được xử lý thành công.
+          content:
+            application/json:
+              schema:
+                $ref : "#/components/schemas/Account"
+        401:
+          description: Unauthorized- người dùng chưa đăng nhập để thực hiện chức năng này.
+        422:
+          description: Unprocessable Entityy - current_password, password, confirm_password chưa được nhập, current_password, password, confirm_password chưa đúng.
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      security:
+        - bearerAuth: [] 
+components:
+  schemas:
+    Account:
+      type: object
+      required:
+        - id
+        - name
+        - fullname
+        - group_id
+        - password
+        - email
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        fullname:
+          type: string
+        group_id:
+          type: string
+        password:
+          type: string
+          format: password
+        email:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ValidationError:
+      type: object
+      additionalProperties:
+        type: array
+        example: ['validation 1','validation 2']
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+

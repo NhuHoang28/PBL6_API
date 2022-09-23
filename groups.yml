@@ -1,0 +1,205 @@
+openapi: 3.0.1
+info:
+  title: Expenditure management
+  version: 1.0.0
+paths:
+  /groups:
+    get:
+      tags:
+      - groups
+      summary: Lấy nhóm học đã được duyệt nhu cầu nhưng chưa được học kèm theo những điều kiện
+      parameters:
+      - name: a
+        in: path
+        description: Đã duyệt nhu cầu chưa
+        required: true
+        schema:
+          type: string
+      - name: b
+        in: path
+        description: Đã duyệt để học chưa
+        required: true
+        schema:
+          type: string
+      - name: c
+        in: path
+        description: tìm kiếm theo môn học
+        required: true
+        schema:
+          type: string
+      - name: d
+        in: path
+        description: Loại nhóm là thiếu mentor, thiếu thành viên, hay  tự học
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Request đã được tiếp nhập và xử lý thành công.
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        401: 
+          description: Access token is missing or invalid
+        403:
+          description: Forbidden Error
+  /groups/{group_id}:
+    get:
+      tags:
+      - groups
+      summary: Lấy thông tin nhóm học (Khi nhấn vào nhóm ds nhóm chưa học, cần care vấn đề là id nhóm đã đc học)
+      responses:
+        200:
+          description: Request đã được tiếp nhập và xử lý thành công.
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        401: 
+          description: Access token is missing or invalid
+        403:
+          description: Forbidden Error
+  /groups/not_accepted_yet:
+    get:
+      tags:
+      - groups
+      summary: Lấy nhóm học đã được duyệt nhu cầu nhưng chưa được học kèm theo những điều kiện
+      parameters:
+      - name: a
+        in: path
+        description: Đã duyệt nhu cầu chưa
+        required: true
+        schema:
+          type: string
+      - name: b
+        in: path
+        description: Đã duyệt để học chưa
+        required: true
+        schema:
+          type: string
+      - name: c
+        in: path
+        description: tìm kiếm theo môn học
+        required: true
+        schema:
+          type: string
+      - name: d
+        in: path
+        description: Loại nhóm là thiếu mentor, thiếu thành viên, hay  tự học
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Request đã được tiếp nhập và xử lý thành công.
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        401: 
+          description: Access token is missing or invalid
+        403:
+          description: Forbidden Error
+    post:
+      tags:
+        - groups
+      summary: Tạo group khi người dùng tạo nhu cầu hoặc mentor tạo nhóm
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+        required: true
+      responses:
+        401: 
+          description: Access token is missing or invalid
+        405:
+          description: Invalid input
+        422:
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+    put:
+      tags:
+        - groups
+      summary: Cập nhật thông tin nhóm (Có thể cập nhật như là status khi mà admin duyệt)
+      parameters:
+      - name: historyId
+        in: path
+        description: history's id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Updated history object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+        required: true
+      responses:
+        401: 
+          description: Access token is missing or invalid
+        403:
+          description: Forbidden Error
+        404:
+          description: History not found
+        405:
+          description: Invalid input
+        422:
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+components:
+  schemas:
+    Group:
+      type: object
+      required:
+        - id 
+        - name
+        - fullname
+        - group_id
+        - password
+        - email
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        fullname:
+          type: string
+        group_id:
+          type: string
+        password:
+          type: string
+          format: password
+        email:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ValidationError:
+      type: object
+      additionalProperties:
+        type: array
+        example: ['validation 1','validation 2']
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
