@@ -7,27 +7,12 @@ paths:
     post:
       tags:
       - accounts
-      summary: Tạo tài khoản mới (Chỉ cần tạo account, còn infor thì của trường)
+      summary: Tạo tài khoản mới (Tạo cả account và infor)
       requestBody:
         content:
           application/json:
             schema:
-              required:
-                - account
-                - password
-                - confirm_password
-                - id_role
-              properties:
-                account:
-                  type: string
-                password:
-                  type: string
-                  format: password
-                confirm_password: 
-                  type: string
-                  format: password
-                id_role:
-                  type: string
+              $ref: "#/components/schemas/Account"
         required: true
       responses:
         200:
@@ -123,12 +108,24 @@ paths:
         content:
           application/json:
             schema:
-              required:
-                  - email
               properties:
                 account:
                   type: string
-                  description: Tên đăng nhập.
+                email:
+                  type: string
+                phone_number:
+                  type: string
+                address:
+                  type: string
+                birthday:
+                  type: string
+                  format: date-time
+                gender:
+                  type: string
+                name:
+                  type: string
+                avatar_url:
+                  type: string
         required: true
       responses:
         201:
@@ -197,32 +194,48 @@ components:
     Account:
       type: object
       required:
-        - id
-        - name
-        - fullname
-        - group_id
+        - account
         - password
+        - role_id
+        - phone_number
+        - address
         - email
+        - birthday
+        - gender
+        - id_class
+        - id_faculty
+        - name
+        - rating
+        - avatar_url
       properties:
-        id:
-          type: string
-        name:
-          type: string
-        fullname:
-          type: string
-        group_id:
+        account:
           type: string
         password:
           type: string
           format: password
+        role_id:
+          type: string
         email:
           type: string
-        created_at:
+        phone_number:
+          type: string
+        address:
+          type: string
+        birthday:
           type: string
           format: date-time
-        updated_at:
+        gender:
           type: string
-          format: date-time
+        id_class:
+          type: string
+        id_faculty:
+          type: string
+        name:
+          type: string
+        rating:
+          type: string
+        avatar_url:
+          type: string
     ValidationError:
       type: object
       additionalProperties:

@@ -9,88 +9,33 @@ paths:
       - groups
       summary: Lấy nhóm học đã được duyệt nhu cầu nhưng chưa được học kèm theo những điều kiện
       parameters:
-      - name: a
+      - name: is_accept
         in: path
-        description: Đã duyệt nhu cầu chưa
+        description: Nhóm đã được duyệt nhu cầu học chưa (không đi kèm)
         required: true
         schema:
           type: string
-      - name: b
+      - name: isStart
         in: path
-        description: Đã duyệt để học chưa
+        description: Nhóm đã được duyệt học chưa (không đi kèm)
         required: true
         schema:
           type: string
-      - name: c
+      - name: search
         in: path
-        description: tìm kiếm theo môn học
+        description: tìm kiếm theo môn học (đi kèm với group_type)
         required: true
         schema:
           type: string
-      - name: d
+      - name: group_type
         in: path
-        description: Loại nhóm là thiếu mentor, thiếu thành viên, hay  tự học
+        description: Loại nhóm là thiếu mentor, thiếu thành viên, hay tự học (đi kèm với search)
         required: true
         schema:
           type: string
-      responses:
-        200:
-          description: Request đã được tiếp nhập và xử lý thành công.
-          content: 
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Group'
-        401: 
-          description: Access token is missing or invalid
-        403:
-          description: Forbidden Error
-  /groups/{group_id}:
-    get:
-      tags:
-      - groups
-      summary: Lấy thông tin nhóm học (Khi nhấn vào nhóm ds nhóm chưa học, cần care vấn đề là id nhóm đã đc học)
-      responses:
-        200:
-          description: Request đã được tiếp nhập và xử lý thành công.
-          content: 
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Group'
-        401: 
-          description: Access token is missing or invalid
-        403:
-          description: Forbidden Error
-  /groups/not_accepted_yet:
-    get:
-      tags:
-      - groups
-      summary: Lấy nhóm học đã được duyệt nhu cầu nhưng chưa được học kèm theo những điều kiện
-      parameters:
-      - name: a
+      - name: account_id
         in: path
-        description: Đã duyệt nhu cầu chưa
-        required: true
-        schema:
-          type: string
-      - name: b
-        in: path
-        description: Đã duyệt để học chưa
-        required: true
-        schema:
-          type: string
-      - name: c
-        in: path
-        description: tìm kiếm theo môn học
-        required: true
-        schema:
-          type: string
-      - name: d
-        in: path
-        description: Loại nhóm là thiếu mentor, thiếu thành viên, hay  tự học
+        description: Lấy toàn bộ ds group của một tài khoản (không đi kèm)
         required: true
         schema:
           type: string
@@ -128,19 +73,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+  /groups/{group_id}:
+    get:
+      tags:
+      - groups
+      summary: Lấy thông tin nhóm học (Khi nhấn vào nhóm ds nhóm chưa học, cần care vấn đề là id nhóm đã đc học, không nên cho xóa và sửa, tránh sửa thông tin lung tung)
+      responses:
+        200:
+          description: Request đã được tiếp nhập và xử lý thành công.
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        401: 
+          description: Access token is missing or invalid
+        403:
+          description: Forbidden Error
     put:
       tags:
         - groups
-      summary: Cập nhật thông tin nhóm (Có thể cập nhật như là status khi mà admin duyệt)
+      summary: Cập nhật thông tin nhóm (Có thể cập nhật như là status khi mà admin duyệt, hoặc cho người tạo nhóm cập nhật thông tin nhóm khi nhóm chưa được duyệt. Nhưng khi người dùng cố tình push lên status nhóm thì server k update)
       parameters:
-      - name: historyId
+      - name: group_id
         in: path
-        description: history's id
         required: true
         schema:
           type: string
       requestBody:
-        description: Updated history object
         content:
           application/json:
             schema:
@@ -152,7 +113,7 @@ paths:
         403:
           description: Forbidden Error
         404:
-          description: History not found
+          description: Group not found
         405:
           description: Invalid input
         422:
@@ -161,37 +122,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+    delete:
+      tags:
+        - groups
+      summary: Xóa nhóm chưa được accept đối với người tạo nhóm và xóa nhóm bất kỳ với admin
+      parameters:
+      - name: group_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        401: 
+          description: Access token is missing or invalid
+        403:
+          description: Forbidden Error
+        404:
+          description: group not found
 components:
   schemas:
     Group:
       type: object
       required:
-        - id 
-        - name
-        - fullname
-        - group_id
-        - password
-        - email
+        - amount
+        - topic
+        - time_stydy
+        - location
+        - status
       properties:
-        id:
+        amount:
+          type: integer
+        topic:
           type: string
-        name:
+        information:
           type: string
-        fullname:
-          type: string
-        group_id:
-          type: string
-        password:
-          type: string
-          format: password
-        email:
-          type: string
-        created_at:
+        time_stydy:
           type: string
           format: date-time
-        updated_at:
+        location:
           type: string
-          format: date-time
+        status:
+          type: boolean
     ValidationError:
       type: object
       additionalProperties:
